@@ -1,13 +1,14 @@
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import ModelView from "./ModelView";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { yellowImg } from "../utils";
 // Thư viện mô hình 3D Three.js
 import * as THREE from "three";
 import { Canvas } from "@react-three/fiber";
 import { View } from "@react-three/drei";
 import { models, sizes } from "../constants";
+import { animateWithGsapTimeline } from "../utils/animations";
 
 const Model = () => {
   // State lưu kích thước mô hình đang chọn (small/large)
@@ -29,8 +30,30 @@ const Model = () => {
   const large = useRef(new THREE.Group()); // Nhóm đối tượng cho mô hình lớn
 
   // State lưu góc xoay của mô hình nhỏ/lớn
-  const [smallRoration, setSmallRoration] = useState(0); // Góc xoay mô hình nhỏ
-  const [largeRoration, setLargeRoration] = useState(0); // Góc xoay mô hình lớn
+  // Đổi tên biến cho đúng chính tả: smallRotation, largeRotation
+  const [smallRotation, setSmallRotation] = useState(0); // Góc xoay mô hình nhỏ
+  const [largeRotation, setLargeRotation] = useState(0); // Góc xoay mô hình lớn
+
+  const tl = gsap.timeline();
+
+  useEffect(() => {
+    // Khi đổi kích thước (small/large), chạy animation chuyển đổi giữa 2 model
+    // Sửa tên biến cho đúng: smallRotation, largeRotation
+    if (size === "large") {
+      animateWithGsapTimeline(tl, small, smallRotation, "#view1", "#view2", {
+        transform: "translateX(-100%)",
+        duration: 2,
+      });
+    }
+
+    if (size === "small") {
+      animateWithGsapTimeline(tl, large, largeRotation, "#view2", "#view1", {
+        transform: "translateX(0)",
+        duration: 2,
+      });
+    }
+    // Nếu muốn animation chạy lại khi đổi model, thêm 'model' vào dependency
+  }, [size]);
 
   // Hiệu ứng xuất hiện tiêu đề bằng GSAP
   useGSAP(() => {
@@ -53,7 +76,7 @@ const Model = () => {
               groupRef={small}
               gsapType="view1"
               controlRef={cameraControlSmall}
-              setRotationState={setSmallRoration}
+              setRotationState={setSmallRotation} // Sửa tên hàm cho đúng
               item={model}
               size={size}
             />
@@ -64,7 +87,7 @@ const Model = () => {
               groupRef={large} // Ref nhóm đối tượng 3D cho mô hình lớn
               gsapType="view2" // Loại hiệu ứng GSAP áp dụng cho mô hình lớn
               controlRef={cameraControlLarge} // Ref điều khiển camera cho mô hình lớn
-              setRotationState={setLargeRoration} // Hàm cập nhật góc xoay mô hình lớn
+              setRotationState={setLargeRotation} // Sửa tên hàm cho đúng
               item={model} // Thông tin mô hình hiện tại (màu, ảnh, tiêu đề)
               size={size} // Kích thước mô hình hiện tại (small/large)
             />
@@ -130,3 +153,8 @@ const Model = () => {
 };
 
 export default Model;
+
+// Ghi chú bổ sung:
+// - Khi click đổi màu (li), state 'model' sẽ đổi, ModelView sẽ nhận props mới và tự động re-render.
+// - Nếu muốn hiệu ứng chuyển đổi model mượt hơn, có thể thêm 'model' vào dependency của useEffect animation.
+// - Đảm bảo ModelView sử dụng đúng props 'item' để render model mới.

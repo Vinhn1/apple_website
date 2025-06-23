@@ -12,7 +12,7 @@ const ModelView = ({
   groupRef, // Ref nhóm đối tượng 3D
   gsapType, // Loại hiệu ứng GSAP áp dụng cho view
   controlRef, // Ref điều khiển camera
-  setRotationSize, // Hàm cập nhật góc xoay
+  setRotationState, // Hàm cập nhật góc xoay
   size, // Kích thước mô hình (small/large)
   item, // Dữ liệu mô hình (màu, ảnh, tiêu đề)
 }) => {
@@ -21,7 +21,7 @@ const ModelView = ({
     <View
       index={index} // Thứ tự view (1: nhỏ, 2: lớn)
       id={gsapType} // Id để áp dụng hiệu ứng GSAP
-      className={`w-full h-full ${index === 2 ? "right-[-100%]" : ""}`}
+      className={`w-full h-full absolute ${index === 2 ? "right-[-100%]" : ""}`}
     >
       {/*
         Sử dụng View của @react-three/drei để render một vùng 3D riêng biệt.
@@ -54,11 +54,10 @@ const ModelView = ({
       >
         {/* Suspense dùng để tải mô hình 3D bất đồng bộ, Loader là fallback khi đang loading */}
         <Suspense fallback={<Loader />}>
-          <IPhone 
-          scale={index === 1 ? [15, 15, 15] : [17, 17, 17]} 
-          item={item}
-          size={size}
-          
+          <IPhone
+            scale={index === 1 ? [15, 15, 15] : [17, 17, 17]}
+            item={item}
+            size={size}
           />
           {/* Hiển thị mô hình iPhone 3D */}
         </Suspense>
