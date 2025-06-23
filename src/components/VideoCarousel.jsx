@@ -3,11 +3,12 @@ import { hightlightsSlides } from "../constants";
 import { pauseImg, playImg, replayImg } from "../utils";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
+import { ScrollTrigger } from "gsap/all";
 
 const VideoCarousel = () => {
   // Tạo ref để truy cập trực tiếp các thẻ video, span, div trong DOM
   const videoRef = useRef([]); // Lưu ref của từng video
-  const videoSpanRef = useRef([]); // Lưu ref của từng span (progress indicator)
+  const videoSpanRef = useRef([]); // Lưu ref của từng span (thanh tiến trình)
   const videoDivRef = useRef([]); // Lưu ref của từng div (vòng tròn chuyển trang)
 
   // State quản lý trạng thái của carousel
@@ -21,7 +22,7 @@ const VideoCarousel = () => {
 
   const [loadedData, setLoadedData] = useState([]); // Lưu trạng thái đã load dữ liệu video
 
-  // Destructure state để dùng cho tiện
+  // Lấy các giá trị state ra để dùng cho tiện
   const { isEnd, startPlay, videoId, isLastVideo, isPlaying } = video;
 
   // Sử dụng GSAP để tạo hiệu ứng khi video xuất hiện trên màn hình
@@ -58,15 +59,68 @@ const VideoCarousel = () => {
 
   // Tạo hiệu ứng chuyển động cho progress indicator khi chuyển video
   useEffect(() => {
-    const currentProgress = 0;
+    let currentProgress = 0;
     let span = videoSpanRef.current;
 
     if (span[videoId]) {
       // Animate tiến trình của video (có thể mở rộng thêm hiệu ứng ở đây)
       let anim = gsap.to(span[videoId], {
-        onUpdate: () => {}, // Có thể thêm hiệu ứng cập nhật tiến trình ở đây
-        onComplete: () => {}, // Callback khi hiệu ứng hoàn thành
+        onUpdate: () => {
+          // Lấy tiến trình hiện tại của animation (theo %)
+          const progress = Math.ceil(anim.progress() * 100);
+          if (progress != currentProgress) {
+            currentProgress = progress;
+
+            // Cập nhật chiều rộng của vòng tròn chuyển trang
+            gsap.to(videoDivRef.current[videoId], {
+              width:
+                window.innerWidth < 760
+                  ? "10vw" // mobile
+                  : window.innerWidth < 1200
+                  ? "10vw" // tablet
+                  : "4vw", // laptop
+            });
+
+            // Cập nhật chiều rộng và màu sắc của thanh tiến trình
+            gsap.to(span[videoId], {
+              width: `${currentProgress}%`,
+              backgroundColor: "white",
+            });
+          }
+        }, // Hàm cập nhật tiến trình khi animation update
+        onComplete: () => {
+          // Khi animation hoàn thành, reset lại giao diện
+          if (isPlaying) {
+            gsap.to(videoDivRef.current[videoId], {
+              width: "12px",
+            });
+
+            gsap.to(span[videoId], {
+              backgroundColor: "#afafaf",
+            });
+          }
+        }, // Callback khi hiệu ứng hoàn thành
       });
+
+      if (videoId === 0) {
+        anim.restart(); // Nếu là video đầu tiên thì restart animation
+      }
+
+      // Hàm cập nhật tiến trình animation dựa trên thời gian thực của video
+      const animUpdate = () => {
+        anim.progress(
+          videoRef.current[videoId].currentTime /
+            hightlightsSlides[videoId].videoDuration
+        );
+      };
+
+      if (isPlaying) {
+        // Khi video đang phát thì liên tục cập nhật tiến trình
+        gsap.ticker.add(animUpdate);
+      } else {
+        // Khi video dừng thì dừng cập nhật tiến trình
+        gsap.ticker.remove(animUpdate);
+      }
     }
   }, [videoId, startPlay]);
 
@@ -108,6 +162,11 @@ const VideoCarousel = () => {
                   ref={(el) => {
                     videoRef.current[i] = el; // Gán ref cho từng video
                   }}
+                  onEnded={() =>
+                    i !== 3
+                      ? handleProcess("video-end", i)
+                      : handleProcess("video-last")
+                  }
                   onPlay={() => {
                     setVideo((prevVideo) => ({
                       ...prevVideo,
@@ -119,9 +178,9 @@ const VideoCarousel = () => {
                   <source src={list.video} type="video/mp4" />
                 </video>
               </div>
-              {/* End Video */}
+              {/* Kết thúc vùng video */}
 
-              {/* Text mô tả cho từng video */}
+              {/* Vùng text mô tả cho từng video */}
               <div className="absolute top-12 left-[5%] z-10">
                 {list.textLists.map((text) => (
                   <p key={text} className="md:text-2xl text-xl font-medium">
@@ -129,7 +188,7 @@ const VideoCarousel = () => {
                   </p>
                 ))}
               </div>
-              {/* End Text */}
+              {/* Kết thúc vùng text */}
             </div>
           </div>
         ))}
@@ -168,7 +227,7 @@ const VideoCarousel = () => {
           />
         </button>
       </div>
-      {/* End UI chuyển trang*/}
+      {/* Kết thúc UI chuyển trang*/}
     </>
   );
 };
