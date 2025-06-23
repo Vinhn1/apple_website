@@ -27,6 +27,13 @@ const VideoCarousel = () => {
 
   // Sử dụng GSAP để tạo hiệu ứng khi video xuất hiện trên màn hình
   useGSAP(() => {
+    // Hiệu ứng chuyển video
+    gsap.to("#slider", {
+      transform: `translateX(${-100 * videoId}%)`,
+      duration: 2,
+      ease: "power2.inOut",
+    });
+
     gsap.to("#video", {
       scrollTrigger: {
         trigger: "#video", // Kích hoạt hiệu ứng khi phần tử #video xuất hiện trong viewport
@@ -139,6 +146,9 @@ const VideoCarousel = () => {
       case "play":
         setVideo((pre) => ({ ...pre, isPlaying: !pre.isPlaying })); // Chuyển đổi trạng thái play/pause
         break;
+      case "pause":
+        setVideo((pre) => ({ ...pre, isPlaying: !pre.isPlaying })); // Chuyển đổi trạng thái play/pause
+        break;
       default:
         return video;
     }
@@ -159,20 +169,27 @@ const VideoCarousel = () => {
                   playsInline={true}
                   preload="auto"
                   muted
+                  // Nếu là video có id = 2 thì dịch sang phải 44 đơn vị, các video khác giữ nguyên vị trí
+                  className={`${
+                    list.id === 2 && "translate-x-44"
+                  } pointer-events-none`}
                   ref={(el) => {
                     videoRef.current[i] = el; // Gán ref cho từng video
                   }}
+                  // Khi video kết thúc: nếu chưa phải video cuối thì chuyển sang video tiếp theo, nếu là video cuối thì đánh dấu kết thúc
                   onEnded={() =>
                     i !== 3
                       ? handleProcess("video-end", i)
                       : handleProcess("video-last")
                   }
+                  // Khi video bắt đầu phát thì cập nhật state isPlaying
                   onPlay={() => {
                     setVideo((prevVideo) => ({
                       ...prevVideo,
                       isPlaying: true, // Đánh dấu video đang phát
                     }));
                   }}
+                  // Khi video load xong metadata thì lưu lại vào loadedData
                   onLoadedMetadata={(e) => handleLoadedMetadata(i, e)} // Khi video load xong metadata thì lưu lại
                 >
                   <source src={list.video} type="video/mp4" />
