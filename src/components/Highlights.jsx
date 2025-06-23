@@ -35,8 +35,8 @@ const Highlights = () => {
         </div>
         {/* End title */}
 
-        {/* Components VideoCarousel */}
-        <VideoCarousel/>
+        {/* VideoCarousel: hiển thị slider các video highlight với hiệu ứng động, điều khiển play/pause, tự động chuyển video và progress bar */}
+        <VideoCarousel />
       </div>
     </section>
   );
