@@ -20,8 +20,6 @@ const VideoCarousel = () => {
     isPlaying: false, // Video hiện tại có đang phát không
   });
 
-  const [loadedData, setLoadedData] = useState([]); // Lưu trạng thái đã load dữ liệu video
-
   // Lấy các giá trị state ra để dùng cho tiện
   const { isEnd, startPlay, videoId, isLastVideo, isPlaying } = video;
 
@@ -52,17 +50,15 @@ const VideoCarousel = () => {
 
   // Theo dõi khi trạng thái video hoặc dữ liệu thay đổi để play/pause video tương ứng
   useEffect(() => {
-    if (loadedData.length > 3) {
+    // Khi videoId thay đổi, tải video hiện tại và phát nếu cần
+    if (videoRef.current[videoId]) {
       if (!isPlaying) {
         videoRef.current[videoId].pause(); // Nếu không phát thì dừng video
       } else {
         startPlay && videoRef.current[videoId].play(); // Nếu phát thì play video
       }
     }
-  }, [startPlay, videoId, isPlaying, loadedData]);
-
-  // Khi video load xong metadata thì lưu lại vào loadedData
-  const handleLoadedMetadata = (i, e) => setLoadedData((pre) => [...pre, e]);
+  }, [startPlay, videoId, isPlaying]);
 
   // Tạo hiệu ứng chuyển động cho progress indicator khi chuyển video
   useEffect(() => {
@@ -167,7 +163,7 @@ const VideoCarousel = () => {
                 <video
                   id="video"
                   playsInline={true}
-                  preload="auto"
+                  preload="metadata"
                   muted
                   // Nếu là video có id = 2 thì dịch sang phải 44 đơn vị, các video khác giữ nguyên vị trí
                   className={`${
@@ -189,8 +185,6 @@ const VideoCarousel = () => {
                       isPlaying: true, // Đánh dấu video đang phát
                     }));
                   }}
-                  // Khi video load xong metadata thì lưu lại vào loadedData
-                  onLoadedMetadata={(e) => handleLoadedMetadata(i, e)} // Khi video load xong metadata thì lưu lại
                 >
                   <source src={list.video} type="video/mp4" />
                 </video>

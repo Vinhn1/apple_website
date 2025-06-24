@@ -29,7 +29,15 @@ function Model(props) {
       }
       material[1].needsUpdate = true;
     });
-  }, [materials, props.item]);
+
+    // Áp dụng texture cho màn hình
+    const screenMaterial = materials.zFdeDaGNRwzccye;
+    if (screenMaterial) {
+      screenMaterial.map = texture;
+      screenMaterial.map.flipY = false; // Thường cần thiết cho texture của GLTF
+      screenMaterial.needsUpdate = true;
+    }
+  }, [materials, props.item, texture]);
 
   return (
     <group {...props} dispose={null}>
@@ -146,8 +154,6 @@ function Model(props) {
         scale={0.01}
       />
 
-      <meshStandardMaterial roughness={1} map={texture} />
-      
       <mesh
         castShadow
         receiveShadow
