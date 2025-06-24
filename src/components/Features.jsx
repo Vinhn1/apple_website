@@ -107,6 +107,7 @@ const Features = () => {
               <div className="feature-text-container">
                 {/* Đoạn mô tả về titanium và iPhone 15 Pro */}
                 <div className="flex-1 flex-center">
+                  {/* Mô tả về vật liệu titanium và ứng dụng trong iPhone 15 Pro */}
                   <p className="feature-text g_text">
                     iphone 15 Pro is {""}
                     <span className="text-white">
@@ -119,6 +120,7 @@ const Features = () => {
                 </div>
 
                 <div className="flex-1 flex-center">
+                  {/* Mô tả về ưu điểm của titanium: nhẹ và bền, giúp iPhone 15 Pro nhẹ nhất từ trước đến nay */}
                   <p className="feature-text g_text">
                     Titanium has one of the best strength-to-weight ratios of
                     any metal, making these our {""}
@@ -129,6 +131,7 @@ const Features = () => {
                   </p>
                 </div>
               </div>
+              {/* End  */}
             </div>
           </div>
         </div>
